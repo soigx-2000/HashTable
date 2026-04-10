@@ -1,29 +1,70 @@
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.io.*;
 
 public class HashTable {
-    int size = 100;
-    ArrayList<ArrayList<String>> table = new ArrayList<ArrayList<String>>(100);
+    private int size = 4;
+    private int count = 1;
+    private ArrayList<String> [] table = new ArrayList [size];
+    public HashTable(){
 
+    }
 // Methods you have to supply:
 //
     public void put(String key) {
-        int index = key.hashCode()%size;
-        for (int i =)
+        System.out.println("Count: " + count + "  Size: " + size);
+        if(count*3 >= size*2){//table s
+        // Saturated
+            expand();
+        }
+        int index = Math.abs(key.hashCode()%size);
+        if(table[index] == null){
+            table[index] = new ArrayList<String>();
+        }
+        table[index].add(key);
+        count++;
+    }
+    public void expand(){
+        count = 0;
+        System.out.println("rehashing");
+        Iterator itr = this.keys();
+        size*=2;
+        table = new ArrayList [size];
+        
+        while(itr.hasNext()){
+            this.put((String)itr.next());
+        }
+        
     }
 //
-//  public String get(String key) {
-//  }
+    public boolean get(String key) {
+        int index = key.hashCode();
+        return table[index].contains(key);
+    }
 //
-//  public String remove(String key){
-//	}
-//
-//  public Iterator keys() {
-//  }
-//
-//  public void print(){
-//	}
+    public String remove(String key){
+        int index = Math.abs(key.hashCode()%size);
+        boolean found = table[index].remove(key);
+
+        if(found){
+            return key;
+        }
+        return "key not found";
+    }
+    public Iterator keys() {
+        return new MyIterator(table);
+    }
+    public void print(){
+        int someNumber = 0;
+        for (ArrayList<String> chain : table){
+            if (chain != null && !chain.isEmpty()){
+                for (String key : chain){
+                    System.out.print("[" +  key + "] ");
+                }
+            }
+            System.out.println(someNumber++);
+        }
+  	}
 	/**
 	 * Loads this HashTable from a file named "Lookup.dat".
 	 */
@@ -56,7 +97,7 @@ public class HashTable {
                     System.out.println("Error in input file");
                     System.exit(1);
                 }
-                put(key, value);
+                put(key);
             }
         }
         catch (IOException e) {
@@ -95,10 +136,6 @@ public class HashTable {
         while (iterator.hasNext()) {
             String key = (String)iterator.next();
             printWriter.println(key);
-            String value = (String)get(key);
-            value = removeNewlines(value);
-            printWriter.println(value);
-            printWriter.println();
         }
        
         // Close the file when we're done
@@ -114,5 +151,23 @@ public class HashTable {
      */
     private String removeNewlines(String value) {
         return value.replaceAll("\r|\n", " ");
+    }
+    public static void main(String[] args) {
+        HashTable table = new HashTable();
+        table.put("stuff1");
+        table.put("stuff2");
+        table.put("stuff3");
+        table.put("stuff1");
+        table.put("stuff2");
+        table.put("stuff3");
+        table.remove("stuff1");
+        table.remove("stuff1");
+        table.remove("stuff1");
+        table.print();
+        Iterator itr = table.keys();
+        while(itr.hasNext()){
+            System.out.println(itr.next());
+        }
+
     }
 }
